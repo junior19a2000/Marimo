@@ -4,7 +4,7 @@ __generated_with = "0.9.18"
 app = marimo.App(width="full", app_title="AHPmethod")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __():
     import numpy as np
     import marimo as mo
@@ -27,12 +27,26 @@ def __():
 
 
     class Titles:
-        def __init__(self, title):
+        def __init__(self, title, nbs):
             self.title = title
+            self.nbs = nbs
 
         def show(self):
+            spaces = '<br/>' * self.nbs
             return mo.vstack(
-                [mo.md(f"<br/>"), mo.md(f"#{self.title}"), mo.md(f"<br/>")]
+                [mo.md(f"{spaces}"), mo.md(f"# {self.title}"), mo.md(f"{spaces}")]
+            )
+
+
+    class Texts:
+        def __init__(self, text, nbs):
+            self.text = text
+            self.nbs = nbs
+
+        def show(self):
+            spaces = '<br/>' * self.nbs
+            return mo.vstack(
+                [mo.md(f"{spaces}"), self.text, mo.md(f"{spaces}")]
             )
 
 
@@ -110,24 +124,26 @@ def __():
             "Vector cociente",
         ]
 
-        ymax = matrix4.mean()
-        # ci = (ymax - criterios.value) / (criterios.value - 1)
-        # cr = ci / np.polyval([-8.44988345e-04, 2.56164206e-02, -2.95897436e-01, 1.61445934e+00, -2.23388889e+00], criterios.value)
-        text1 = mo.md(f"El cociente promedio resultante es {str(round(ymax, 3))}")
+        ym = matrix4.mean()
+        ci = (ym - criterios) / (criterios - 1)
+        cr = ci / np.polyval([-8.44988345e-04, 2.56164206e-02, -2.95897436e-01, 1.61445934e+00, -2.23388889e+00], criterios) * 100
+        consistencia = 'es consistente.' if cr < 10 else 'no es consistente.'
+        text1 = mo.md(f"El cociente promedio resultante es {str(round(ym, 3))}, por lo que el índice CI es igual a {str(round(ci, 3))} y el índice CR es igual {str(round(cr, 3))}%; en concecuencia la matriz de consistencias {consistencia}")
         matrixs = [
-            Titles("Matriz de consistencias").show(),
+            Titles("Matriz de consistencias", 1).show(),
             matrix0,
-            Titles("Matriz normalizada").show(),
+            Titles("Matriz normalizada", 1).show(),
             matrix1,
-            Titles("Matriz de vectores").show(),
+            Titles("Matriz de vectores", 1).show(),
             matrix5,
-            text1,
+            Texts(text1, 1).show(),
         ]
         return matrixs
     return (
         CompareLayoutValues,
         Criterio,
         ShowMatrix,
+        Texts,
         Titles,
         mo,
         np,
